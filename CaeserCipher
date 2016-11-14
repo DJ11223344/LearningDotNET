@@ -1,0 +1,166 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+
+namespace CaeserCipherWPF
+{
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
+    {
+        
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            
+        }
+
+        private void encryptBtn_Click(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void decryptBtn_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void resultBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+           
+        }
+    }
+    
+    class CaeserCipher : MainWindow
+    {
+
+        private string EncryptText;
+        private int ShiftNumber;
+        
+
+        
+        
+        //Takes text from the encrypt text box and stores it in a private field
+        public string TextToEncrpyt()
+        {
+            EncryptText = inputBox.Text;
+            return EncryptText;
+        }
+        
+        public void EncryptMethod()
+        {
+            EncryptionMethod();
+        }
+
+        public string returnEncrpytedText()
+        {
+            resultBox.Text = EncryptText;
+            return resultBox.Text;
+        }
+        //Method to define the number of alphabet shifts
+        private int Shift()
+        {
+            Random r = new Random();
+
+            try
+            {
+                int a = Convert.ToInt16(cipherKeyBox.Text);
+                if ((a >= 1) || (a <= 26))
+                {
+                    ShiftNumber = a;
+                }
+                else
+                {
+                    ShiftNumber = r.Next(1, 26);
+                    cipherKeyBox.Text = ShiftNumber.ToString();
+                }
+            }
+            catch //Generates a random number if it cannot convert the number to int
+            {
+                ShiftNumber = r.Next(1, 26);
+                cipherKeyBox.Text = ShiftNumber.ToString();
+            }
+            return ShiftNumber;
+        }
+
+        //Removes special characters and numbers from the text
+        private string RemoveSpecChars()
+        {
+
+            string newString = EncryptText;
+            
+            newString.Trim(new char[] {
+                '!','@','#','$','%','^','&','*','(',')','-','_','=','+','{','}','[',']','\\','|',':',';',
+                '<','>',',','.','?','/','`','~','1','2','3','4','5','6','7','8','9','0'});
+            EncryptText = newString;
+            return EncryptText;
+
+        }
+    
+
+        //Takes string from EncryptText and converts it to a char array
+        //Then copies the char array to an int array
+        private string EncryptionMethod()
+        {
+
+            string e = EncryptText;
+            Shift();
+            int n = ShiftNumber;
+            RemoveSpecChars();
+            
+
+            //converts the string to a char array
+            char[] textToArr = e.ToCharArray();
+
+            int[] convToInt = new int[textToArr.Length];
+
+            //copies the char array and cast it into an int array
+            for (int i = 0; i < textToArr.Length; i++)
+            {
+                char a = textToArr[i];
+                convToInt[i] = (int)a;
+            }
+
+            for (int i = 0; i < convToInt.Length; i++)
+            {
+                if (convToInt[i] == 32) //Ignores spaces
+                {
+                    continue;
+                }
+                else if (convToInt[i] + n > 90)
+                {
+                    convToInt[i] = (convToInt[i] - 26) + n; //to include only the alphabet
+                }
+                else
+                {
+                    convToInt[i] += n;
+                }
+
+            }
+
+            for (int i = 0; i < convToInt.Length; i++) //converts the int[] to a char[]
+            {
+                int a = convToInt[i];
+                textToArr[i] = (char)a;
+            }
+            string _e = new string(textToArr); //converts the char[] to a string
+            EncryptText = _e;
+
+            return EncryptText;
+        }
+
+    }
+}
