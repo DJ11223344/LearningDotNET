@@ -1,0 +1,124 @@
+using System;
+
+
+namespace InterviewPrac
+{
+    class Program 
+    {
+        static void Main(string[] args)
+        {
+
+            //FizzBuzzWOloops(100);
+            //Console.WriteLine(FibonacciSequence(12));
+            //NaturalNumbers(10);
+            //Console.WriteLine(AddSpaceToString("HelloWorld"));
+            //AsteriksTriangle(5);
+            //SumOfArray();
+            
+
+            Console.ReadLine();
+
+        }
+        
+        public static void SumOfArray()
+        {
+            int[] myArray = new int[3];
+
+            int sum = 0;
+
+            for (int i = 0; i < myArray.Length; i++)
+            {
+                Console.WriteLine("Enter a number into the array:");
+                myArray[i] = Convert.ToInt32(Console.ReadLine());
+                Console.WriteLine();
+            }
+
+            Console.WriteLine("The contents of the array are: ");
+            foreach (int i in myArray)
+            {
+                Console.Write("{0} ",i);
+            }
+            Console.WriteLine();
+            foreach (int item in myArray)
+            {
+                sum += item;
+            }
+            Console.WriteLine("The sum of the array is: {0}", sum);
+        }
+
+        public static void AsteriksTriangle(int rows)
+        {
+            string exit = "";
+            
+            while (exit != "exit")
+            {
+                int a;
+
+                for (int i = 0; i < rows; i++)
+                {
+                    for (a = 5; a > i; a--)
+                        Console.Write("*");
+                    Console.WriteLine();
+                }
+                Console.WriteLine("Type exit to exit: ");
+                exit = Console.ReadLine();
+            }
+            
+        }
+
+        
+
+        public static string AddSpaceToString (string s)
+        {
+            string str = "";
+            foreach (char c in s)
+            {
+                str += c + " ";
+            }
+            return str;
+        }
+
+        public static void FizzBuzzWOloops(int n)
+        {
+            
+            if (n == 0)
+                return;
+
+            FizzBuzzWOloops(n - 1);
+            
+            if ((n%3==0)&&(n%5==0))
+                Console.WriteLine("FizzBuzz");
+            else if (n % 3 == 0)
+                Console.WriteLine("Fizz");
+            else if (n % 5 == 0)
+                Console.WriteLine("Buzz");
+            else
+                Console.WriteLine(n);
+        }
+
+        public static int FibonacciSequence(int n)
+        {
+            // 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144
+            
+            if (n == 0)
+                return 0;
+            if (n == 1)
+                return 1;
+            else
+                return (FibonacciSequence(n - 1) + FibonacciSequence(n - 2));
+        }
+
+        public static void NaturalNumbers(int n)
+        {
+
+
+            if (n == 0)
+                return;
+            else
+            {
+                Console.Write("{0}, ", n);
+                NaturalNumbers(n - 1);
+            }
+        }
+    }
+}     
