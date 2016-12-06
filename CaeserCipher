@@ -1,20 +1,13 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Microsoft.Win32;
+using System.IO;
+using System.Text.RegularExpressions;
 
 namespace CaeserCipherWPF
 {
+
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -28,139 +21,212 @@ namespace CaeserCipherWPF
             
         }
 
+        #region Event Handlers
+        
         private void encryptBtn_Click(object sender, RoutedEventArgs e)
         {
-            
-        }
+            string input = inputBox.Text;
+            int ComboBoxKey = Convert.ToInt32(cipherKeyCombo.SelectedValue);
 
+            CaeserCipher c = new CaeserCipher(input, ComboBoxKey);
+            resultBox.Text = c.EncyptionMessage();
+        }
+        
         private void decryptBtn_Click(object sender, RoutedEventArgs e)
         {
+            string input = inputBox.Text;
+            int ComboBoxKey = Convert.ToInt32(cipherKeyCombo.SelectedValue);
 
+            CaeserCipher c = new CaeserCipher(input, ComboBoxKey);
+            resultBox.Text = c.DecyptionMessage();
         }
 
-        private void resultBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void helpBtn_Click(object sender, RoutedEventArgs e)
         {
-           
+            inputBox.Text = "To use this application, add your text to this box. If this is text you encrypted earlier, select the cipher key you used to encrypt the text and hit decrypt. If you need to encrypt text, select the key you want to use to encrypt it. Special characters and numbers are remove, except \".\"\nYou can try the app out with this text if you like! ";
         }
+
+        private void saveFile_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Text file (*.txt)|*.txt";
+
+            if (resultBox.Text.Length < 1)
+            {
+                MessageBox.Show("There is no text to save!\n\nAdd some text and try again.", "Save Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            }
+            else if (saveFileDialog.ShowDialog() == true)
+
+                File.WriteAllText(saveFileDialog.FileName, resultBox.Text);
+            else
+                throw new Exception("Unknown error");
+        }
+
+        private void openFile_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Text file (*.txt)|*.txt";
+            
+            if (openFileDialog.ShowDialog() == true)
+            {
+                inputBox.Text = File.ReadAllText(openFileDialog.FileName);
+            }
+        }
+        #endregion
     }
-    
-    class CaeserCipher : MainWindow
+}
+
+    class CaeserCipher
     {
 
-        private string EncryptText;
-        private int ShiftNumber;
-        
+        //Properties for the CaeserCipher class
+        private string TextFromTextBox { get; set; }
+        private int ShiftNumber { get; set; }
 
-        
-        
-        //Takes text from the encrypt text box and stores it in a private field
-        public string TextToEncrpyt()
+        //Default constructor
+        public CaeserCipher() { }
+
+        //Constructor that takes the user input
+        public CaeserCipher(string inputMessage, int cipherKey)
         {
-            EncryptText = inputBox.Text;
-            return EncryptText;
-        }
-        
-        public void EncryptMethod()
-        {
-            EncryptionMethod();
+            TextFromTextBox = RemoveSpecChars(inputMessage).ToUpper();
+            ShiftNumber = cipherKey;
         }
 
-        public string returnEncrpytedText()
+        /// <summary>
+        /// Removes special characters and numbers from the text.
+        /// </summary>
+        /// <param name="inputMsg">Takes string input that needs special chars removed</param>
+        /// <returns></returns>
+        private string RemoveSpecChars(string inputMsg)
         {
-            resultBox.Text = EncryptText;
-            return resultBox.Text;
+            string filteredText = Regex.Replace(inputMsg, "[^a-zA-Z.]", " ");
+            return filteredText;
         }
-        //Method to define the number of alphabet shifts
-        private int Shift()
-        {
-            Random r = new Random();
+        
 
-            try
+        /// <summary>
+        /// Takes a string, converts it to an array. 
+        /// </summary>
+        /// <param name="inputMessage">Takes string from text box</param>
+        /// <returns></returns>
+        private int[] ConvTextToIntArray(string inputMessage)
+        {
+            char[] textToArray = inputMessage.ToCharArray();
+            int[] convCharToIntArr = new int[textToArray.Length];
+
+            for (int i = 0; i < textToArray.Length; i++)
             {
-                int a = Convert.ToInt16(cipherKeyBox.Text);
-                if ((a >= 1) || (a <= 26))
-                {
-                    ShiftNumber = a;
-                }
-                else
-                {
-                    ShiftNumber = r.Next(1, 26);
-                    cipherKeyBox.Text = ShiftNumber.ToString();
-                }
-            }
-            catch //Generates a random number if it cannot convert the number to int
-            {
-                ShiftNumber = r.Next(1, 26);
-                cipherKeyBox.Text = ShiftNumber.ToString();
-            }
-            return ShiftNumber;
-        }
-
-        //Removes special characters and numbers from the text
-        private string RemoveSpecChars()
-        {
-
-            string newString = EncryptText;
-            
-            newString.Trim(new char[] {
-                '!','@','#','$','%','^','&','*','(',')','-','_','=','+','{','}','[',']','\\','|',':',';',
-                '<','>',',','.','?','/','`','~','1','2','3','4','5','6','7','8','9','0'});
-            EncryptText = newString;
-            return EncryptText;
-
-        }
-    
-
-        //Takes string from EncryptText and converts it to a char array
-        //Then copies the char array to an int array
-        private string EncryptionMethod()
-        {
-
-            string e = EncryptText;
-            Shift();
-            int n = ShiftNumber;
-            RemoveSpecChars();
-            
-
-            //converts the string to a char array
-            char[] textToArr = e.ToCharArray();
-
-            int[] convToInt = new int[textToArr.Length];
-
-            //copies the char array and cast it into an int array
-            for (int i = 0; i < textToArr.Length; i++)
-            {
-                char a = textToArr[i];
-                convToInt[i] = (int)a;
+                char letter = textToArray[i];
+                convCharToIntArr[i] = letter;
             }
 
-            for (int i = 0; i < convToInt.Length; i++)
+            return convCharToIntArr;
+        }
+
+        /// <summary>
+        /// Implements the Caeser Cipher encryption by taking in the applying the key (# of shifts) and applying it to the int array. 
+        /// </summary>
+        /// <param name="textFromIntArr">from converted string</param>
+        /// <param name="keyShift">Equal to the shift number. Use KeyShift as the input for this method</param>
+        /// <returns>String as a char array</returns>
+        private char[] CaeserEncryptImp(int[] textFromIntArr, int keyShift)
+        {
+
+            char[] convIntToCharArr = new char[textFromIntArr.Length];
+
+            for (int i = 0; i < textFromIntArr.Length; i++)
             {
-                if (convToInt[i] == 32) //Ignores spaces
-                {
+                if (textFromIntArr[i] == 32 || textFromIntArr[i] == 46) //Ignores spaces
+                
                     continue;
-                }
-                else if (convToInt[i] + n > 90)
-                {
-                    convToInt[i] = (convToInt[i] - 26) + n; //to include only the alphabet
-                }
+                
+                else if (textFromIntArr[i] + keyShift > 90)
+                
+                    textFromIntArr[i] = (textFromIntArr[i] - 26) + keyShift;
+               
                 else
-                {
-                    convToInt[i] += n;
-                }
-
+                
+                    textFromIntArr[i] += keyShift;
+                
             }
 
-            for (int i = 0; i < convToInt.Length; i++) //converts the int[] to a char[]
+            for (int i = 0; i < textFromIntArr.Length; i++)
             {
-                int a = convToInt[i];
-                textToArr[i] = (char)a;
+                convIntToCharArr[i] = (char)textFromIntArr[i];
             }
-            string _e = new string(textToArr); //converts the char[] to a string
-            EncryptText = _e;
 
-            return EncryptText;
+            return convIntToCharArr;
+        }
+        /// <summary>
+        /// Implements the Caeser Cipher decryption by taking in the applying the key (# of shifts) and applying it to the int array. 
+        /// </summary>
+        /// <param name="textFromIntArr">int[] </param>
+        /// <param name="keyShift"> int</param>
+        /// <returns>char[]</returns>
+        private char[] CaeserDecryptImp(int[] textFromIntArr, int keyShift)
+        {
+
+            char[] convIntToCharArr = new char[textFromIntArr.Length];
+
+            for (int i = 0; i < textFromIntArr.Length; i++)
+            {
+                if (textFromIntArr[i] == 32 || textFromIntArr[i] == 46) //Ignores spaces and dots
+
+                    continue;
+
+                else if (textFromIntArr[i] - keyShift < 65)
+
+                    textFromIntArr[i] = (textFromIntArr[i] + 26) - keyShift;
+
+                else
+
+                    textFromIntArr[i] -= keyShift;
+
+            }
+
+            for (int i = 0; i < textFromIntArr.Length; i++)
+            {
+                convIntToCharArr[i] = (char)textFromIntArr[i];
+            }
+
+            return convIntToCharArr;
         }
 
+        /// <summary>
+        /// Takes in a char array and converts it back to a string
+        /// </summary>
+        /// <param name="charArr">Takes the char array and converts it back to string</param>
+        /// <returns></returns>
+        private string CharArrToText(char[] charArr)
+        {
+            string charArrToText = new string(charArr); //converts the char[] to a string
+            return charArrToText;
+        }
+
+        /// <summary>
+        /// This method runs text through text encryption methods
+        /// </summary>
+        /// <returns>Encrypted string</returns>
+        public string EncyptionMessage()
+        {
+            string encText = TextFromTextBox;
+            char[] arr = CaeserEncryptImp(ConvTextToIntArray(encText), ShiftNumber);
+            return CharArrToText(arr);
+        }
+
+        /// <summary>
+        /// This method runs text through text decryption methods
+        /// </summary>
+        /// <returns>string</returns>
+        public string DecyptionMessage()
+        {
+            string DecryptText = TextFromTextBox;
+            char[] arr = CaeserDecryptImp(ConvTextToIntArray(DecryptText), ShiftNumber);
+            return CharArrToText(arr);
+        }
     }
+    
 }
